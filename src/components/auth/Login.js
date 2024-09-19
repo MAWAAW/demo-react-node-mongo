@@ -11,16 +11,11 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:5000/login', {
-        email,
-        password,
-      });
-      localStorage.setItem('token', response.data.token);
-      // Redirection vers la page principale ou autre
-      console.log('Connexion réussie', response.data);
+      const response = await axios.post('http://localhost:5000/login', { email, password });
+      localStorage.setItem('token', response.data.token);  // Stocker le token JWT dans le localStorage
+      window.location.href = '/tasks';  // Rediriger vers la page des tâches après la connexion
     } catch (error) {
-      setErrorMessage('Erreur lors de la connexion. Veuillez réessayer.');
-      console.error('Erreur de connexion :', error);
+      setErrorMessage('Erreur de connexion. Veuillez réessayer.');
     }
   };
 
