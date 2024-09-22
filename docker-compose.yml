@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend  # Chemin vers le répertoire frontend avec le Dockerfile
+    ports:
+      - "3000:3000"  # Mapper le port local 3000 avec le port 3000 du conteneur
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./backend  # Chemin vers le répertoire backend avec le Dockerfile
+    ports:
+      - "5000:5000"  # Mapper le port local 5000 avec le port 5000 du conteneur
+    environment:
+      MONGO_URI: mongodb://mongo:27017/task-manager  # Utiliser MongoDB à partir du service Mongo
+      JWT_SECRET: supersecretjwtkey
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+
+  mongo:
+    image: mongo  # Utiliser l'image officielle de MongoDB
+    ports:
+      - "27017:27017"  # Mapper le port local 27017 avec MongoDB
+    volumes:
+      - mongo-data:/data/db  # Stocker les données MongoDB dans un volume persistant
+    networks:
+      - app-network
+
+volumes:
+  mongo-data:  # Volume pour persister les données de MongoDB
+
+networks:
+  app-network:
+    driver: bridge
