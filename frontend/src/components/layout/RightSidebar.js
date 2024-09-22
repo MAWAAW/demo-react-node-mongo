@@ -1,10 +1,9 @@
-// src/components/layout/RightSidebar.js
 import React from 'react';
 import { Box, Typography, Button, IconButton } from '@mui/material';
 import { Close as CloseIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import taskService from '../../services/taskService';
 
-function RightSidebar({ selectedTask, setSelectedTask, tasks, setTasks, fetchTasks }) {
+function RightSidebar({ selectedTask, setSelectedTask, tasks, setTasks }) {
   if (!selectedTask) return null;
 
   const deleteTask = async () => {

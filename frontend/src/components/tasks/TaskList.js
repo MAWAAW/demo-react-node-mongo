@@ -1,4 +1,3 @@
-// src/components/tasks/TaskList.js
 import React from 'react';
 import { List, ListItem, ListItemButton, ListItemText, Checkbox } from '@mui/material';
 import taskService from '../../services/taskService';

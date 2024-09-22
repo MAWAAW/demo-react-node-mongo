@@ -1,22 +1,18 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const seedDatabase = require('./seed'); // Importer le script de seed
+const seedDatabase = require('./seed');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const { check, validationResult } = require('express-validator');
 
-// Importer les modèles
 const User = require('./models/User');
 const TaskList = require('./models/TaskList');
 const Task = require('./models/Task');
 
-// Importer le middleware d'authentification
 const auth = require('./middleware/auth');
 
 const app = express();
-
-// Middleware
 app.use(express.json());
 app.use(cors());
 
@@ -26,7 +22,7 @@ const jwtSecret = 'supersecretjwtkey'; // Remplacez par votre clé secrète JWT
 mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/task-manager')
   .then(() => {
     console.log('MongoDB connecté')
-    seedDatabase();  // Exécuter le script de seed après la connexion à MongoDB
+    seedDatabase();
   })
   .catch(err => console.error('Erreur de connexion à MongoDB:', err));
 

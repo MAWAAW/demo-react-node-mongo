@@ -1,4 +1,3 @@
-// src/pages/AuthPage.js
 import React, { useState } from 'react';
 import { Container, Box, Card, CardContent, Typography, Link } from '@mui/material';
 import Login from '../components/auth/Login';

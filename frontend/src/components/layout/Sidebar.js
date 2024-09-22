@@ -1,4 +1,3 @@
-// src/components/layout/Sidebar.js
 import React, { useState, useEffect } from 'react';
 import { Box, IconButton, TextField, Button, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
 import { Menu as MenuIcon, Delete as DeleteIcon } from '@mui/icons-material';

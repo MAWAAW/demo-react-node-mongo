@@ -1,4 +1,3 @@
-// src/components/tasks/AddTask.js
 import React, { useState } from 'react';
 import { TextField, Button, Box } from '@mui/material';
 import taskService from '../../services/taskService';
@@ -55,9 +54,6 @@ function AddTask({ taskListId, fetchTasks }) {
         onChange={onChange}
         required
         sx={{ mt: 2 }}
-        InputLabelProps={{
-          shrink: true,
-        }}
       />
       <Button type="submit" variant="contained" sx={{ mt: 2 }}>
         Ajouter la tâche

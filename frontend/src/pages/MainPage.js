@@ -1,4 +1,3 @@
-// src/pages/MainPage.js
 import React, { useState, useEffect, useCallback } from 'react';
 import { Box } from '@mui/material';
 import Sidebar from '../components/layout/Sidebar';

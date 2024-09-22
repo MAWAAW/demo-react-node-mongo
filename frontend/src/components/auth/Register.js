@@ -1,4 +1,3 @@
-// src/components/auth/Register.js
 import React, { useState } from 'react';
 import { TextField, Button, Box, Typography, Alert } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
@@ -36,14 +35,13 @@ function Register() {
     }
 
     try {
-      // Envoyer tous les champs au serveur
       await authService.register({
         nom,
         prenom,
         email,
-        emailConfirm, // Inclure emailConfirm
+        emailConfirm,
         password,
-        passwordConfirm, // Inclure passwordConfirm
+        passwordConfirm,
       });
       navigate('/');
     } catch (err) {

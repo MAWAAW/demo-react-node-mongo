@@ -1,20 +1,15 @@
-// src/components/layout/MainContent.js
 import React, { useState } from 'react';
 import { Box, Typography, Button } from '@mui/material';
-import { useNavigate } from 'react-router-dom';  // Pour la redirection
+import { useNavigate } from 'react-router-dom';
 import AddTask from '../tasks/AddTask';
 import TaskList from '../tasks/TaskList';
 
-function MainContent({ selectedTaskList, setSelectedTask, tasks, setTasks, fetchTasks }) {
+function MainContent({ selectedTaskList, setSelectedTask, tasks, fetchTasks }) {
   const [showCompleted, setShowCompleted] = useState(false);
-  const navigate = useNavigate();  // Hook pour redirection
+  const navigate = useNavigate();
 
-  // Fonction de déconnexion
   const handleLogout = () => {
-    // Supprimer le token JWT de localStorage
     localStorage.removeItem('token');
-      
-    // Rediriger vers la page d'authentification
     navigate('/auth');
   };
 

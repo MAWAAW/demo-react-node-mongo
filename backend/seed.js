@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 const User = require('./models/User');
 const TaskList = require('./models/TaskList');
 const Task = require('./models/Task');
@@ -8,7 +7,6 @@ const seedDatabase = async () => {
   try {
     console.log('Initialisation des données de base...');
 
-    // Vérifier s'il y a déjà un utilisateur
     let user = await User.findOne({ email: 'user@example.com' });
     if (!user) {
       console.log('Création d\'un utilisateur de base');
@@ -23,7 +21,6 @@ const seedDatabase = async () => {
       console.log('Utilisateur déjà existant');
     }
 
-    // Vérifier s'il y a déjà des listes de tâches
     let taskList = await TaskList.findOne({ user: user._id, nom: 'Liste par défaut' });
     if (!taskList) {
       console.log('Création de la liste de tâches par défaut');
@@ -36,7 +33,6 @@ const seedDatabase = async () => {
       console.log('Liste de tâches déjà existante');
     }
 
-    // Vérifier s'il y a déjà des tâches dans cette liste
     const taskCount = await Task.countDocuments({ taskList: taskList._id });
     if (taskCount === 0) {
       console.log('Création de tâches par défaut');
