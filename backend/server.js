@@ -5,6 +5,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const { check, validationResult } = require('express-validator');
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
 
 const User = require('./models/User');
 const TaskList = require('./models/TaskList');
@@ -12,14 +14,73 @@ const Task = require('./models/Task');
 
 const auth = require('./middleware/auth');
 
+// Swagger configuration
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'API Documentation',
+      version: '1.0.0',
+      description: 'Documentation de l\'API de gestion des tâches',
+      contact: {
+        name: 'John Doe',
+        email: 'john.doe@example.com'
+      }
+    },
+    servers: [
+      {
+        url: 'http://localhost:5000',
+        description: 'Serveur de développement'
+      }
+    ],
+    components: {
+      schemas: {
+        Task: {
+          type: 'object',
+          required: ['taskListId', 'shortDescription', 'longDescription', 'dateEcheance'],
+          properties: {
+            taskListId: {
+              type: 'string',
+              description: 'ID de la liste de tâches associée'
+            },
+            shortDescription: {
+              type: 'string',
+              description: 'Brève description de la tâche'
+            },
+            longDescription: {
+              type: 'string',
+              description: 'Description détaillée de la tâche'
+            },
+            dateEcheance: {
+              type: 'string',
+              format: 'date',
+              description: 'Date limite de la tâche'
+            },
+            completed: {
+              type: 'boolean',
+              description: 'Statut d\'achèvement de la tâche'
+            }
+          }
+        },
+      }
+    }
+  },
+  apis: ['./server.js'], // Chemins vers les fichiers à documenter
+};
+
 const app = express();
+
+// Swagger setup
+const swaggerDocs = swaggerJsdoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
 app.use(express.json());
 app.use(cors());
 
 const jwtSecret = 'supersecretjwtkey'; // Remplacez par votre clé secrète JWT
 
 // Connexion à MongoDB
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/task-manager')
+mongoose.connect(process.env.MONGO_URI || 'mongodb://mongo:27017/task-manager')
   .then(() => {
     console.log('MongoDB connecté')
     seedDatabase();
@@ -28,7 +89,43 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/task-manage
 
 // Routes d'authentification
 
-// Inscription
+/**
+ * @swagger
+ * /register:
+ *   post:
+ *     summary: Inscription d'un nouvel utilisateur
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nom:
+ *                 type: string
+ *                 description: Le nom de l'utilisateur
+ *               prenom:
+ *                 type: string
+ *                 description: Le prénom de l'utilisateur
+ *               email:
+ *                 type: string
+ *                 description: L'email de l'utilisateur
+ *               emailConfirm:
+ *                 type: string
+ *                 description: Confirmation de l'email
+ *               password:
+ *                 type: string
+ *                 description: Le mot de passe de l'utilisateur
+ *               passwordConfirm:
+ *                 type: string
+ *                 description: Confirmation du mot de passe
+ *     responses:
+ *       201:
+ *         description: Utilisateur inscrit avec succès
+ *       400:
+ *         description: Erreurs de validation
+ */
 app.post(
   '/register',
   [
@@ -77,7 +174,33 @@ app.post(
   }
 );
 
-// Connexion
+/**
+ * @swagger
+ * /login:
+ *   post:
+ *     summary: Connexion de l'utilisateur
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 description: L'email de l'utilisateur
+ *               password:
+ *                 type: string
+ *                 description: Le mot de passe de l'utilisateur
+ *     responses:
+ *       200:
+ *         description: Connexion réussie, renvoie un jeton JWT
+ *       400:
+ *         description: Erreurs de validation
+ *       401:
+ *         description: Identifiants incorrects
+ */
 app.post(
   '/login',
   [
@@ -119,7 +242,30 @@ app.post(
 
 // Routes des listes de tâches
 
-// Créer une nouvelle liste de tâches
+/**
+ * @swagger
+ * /tasklists:
+ *   post:
+ *     summary: Créer une nouvelle liste de tâches
+ *     tags: [TaskLists]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Le nom de la liste de tâches
+ *     responses:
+ *       201:
+ *         description: Liste de tâches créée avec succès
+ *       400:
+ *         description: Erreur de validation
+ *       500:
+ *         description: Erreur serveur
+ */
 app.post(
   '/tasklists',
   [auth, [check('nom', 'Le nom est requis').not().isEmpty()]],
@@ -153,7 +299,31 @@ app.post(
   }
 );
 
-// Obtenir toutes les listes de tâches de l'utilisateur
+/**
+ * @swagger
+ * /tasklists:
+ *   get:
+ *     summary: Récupérer toutes les listes de tâches de l'utilisateur
+ *     tags: [TaskLists]
+ *     responses:
+ *       200:
+ *         description: Liste des listes de tâches
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                     description: L'ID de la liste de tâches
+ *                   name:
+ *                     type: string
+ *                     description: Le nom de la liste de tâches
+ *       500:
+ *         description: Erreur serveur
+ */
 app.get('/tasklists', auth, async (req, res) => {
   try {
     const lists = await TaskList.find({ user: req.user }).sort({ dateCreation: -1 });
@@ -164,7 +334,27 @@ app.get('/tasklists', auth, async (req, res) => {
   }
 });
 
-// Supprimer une liste de tâches et ses tâches associées
+/**
+ * @swagger
+ * /tasklists/{id}:
+ *   delete:
+ *     summary: Supprimer une liste de tâches
+ *     tags: [TaskLists]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: L'ID de la liste de tâches à supprimer
+ *     responses:
+ *       200:
+ *         description: Liste de tâches supprimée avec succès
+ *       404:
+ *         description: Liste de tâches non trouvée
+ *       500:
+ *         description: Erreur serveur
+ */
 app.delete('/tasklists/:id', auth, async (req, res) => {
   try {
     const list = await TaskList.findById(req.params.id);
@@ -193,7 +383,40 @@ app.delete('/tasklists/:id', auth, async (req, res) => {
 
 // Routes des tâches
 
-// Créer une nouvelle tâche
+/**
+ * @swagger
+ * /tasks:
+ *   post:
+ *     summary: Créer une nouvelle tâche dans une liste de tâches
+ *     tags: [Tasks]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               taskListId:
+ *                 type: string
+ *                 description: L'ID de la liste de tâches associée
+ *               shortDescription:
+ *                 type: string
+ *                 description: Brève description de la tâche
+ *               longDescription:
+ *                 type: string
+ *                 description: Description détaillée de la tâche
+ *               dateEcheance:
+ *                 type: string
+ *                 format: date
+ *                 description: Date limite de la tâche
+ *     responses:
+ *       201:
+ *         description: Tâche créée avec succès
+ *       400:
+ *         description: Erreur de validation
+ *       500:
+ *         description: Erreur serveur
+ */
 app.post(
   '/tasks',
   [
@@ -240,7 +463,33 @@ app.post(
   }
 );
 
-// Obtenir toutes les tâches d'une liste de tâches
+/**
+ * @swagger
+ * /tasks/{taskListId}:
+ *   get:
+ *     summary: Récupérer les tâches d'une liste spécifique
+ *     tags: [Tasks]
+ *     parameters:
+ *       - in: path
+ *         name: taskListId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: L'ID de la liste de tâches
+ *     responses:
+ *       200:
+ *         description: Liste des tâches
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Task'
+ *       404:
+ *         description: Liste de tâches non trouvée
+ *       500:
+ *         description: Erreur serveur
+ */
 app.get('/tasks/:taskListId', auth, async (req, res) => {
   try {
     // Vérifier que la liste de tâches existe et appartient à l'utilisateur
@@ -261,7 +510,47 @@ app.get('/tasks/:taskListId', auth, async (req, res) => {
   }
 });
 
-// Mettre à jour une tâche
+/**
+ * @swagger
+ * /tasks/{id}:
+ *   put:
+ *     summary: Mettre à jour une tâche
+ *     tags: [Tasks]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: L'ID de la tâche à mettre à jour
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               shortDescription:
+ *                 type: string
+ *                 description: Brève description de la tâche
+ *               longDescription:
+ *                 type: string
+ *                 description: Description détaillée de la tâche
+ *               dateEcheance:
+ *                 type: string
+ *                 format: date
+ *                 description: Date limite de la tâche
+ *               completed:
+ *                 type: boolean
+ *                 description: Statut d'achèvement de la tâche
+ *     responses:
+ *       200:
+ *         description: Tâche mise à jour avec succès
+ *       404:
+ *         description: Tâche non trouvée
+ *       500:
+ *         description: Erreur serveur
+ */
 app.put('/tasks/:id', auth, async (req, res) => {
   const { shortDescription, longDescription, dateEcheance, completed } = req.body;
 
@@ -293,7 +582,27 @@ app.put('/tasks/:id', auth, async (req, res) => {
   }
 });
 
-// Supprimer une tâche
+/**
+ * @swagger
+ * /tasks/{id}:
+ *   delete:
+ *     summary: Supprimer une tâche
+ *     tags: [Tasks]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: L'ID de la tâche à supprimer
+ *     responses:
+ *       200:
+ *         description: Tâche supprimée avec succès
+ *       404:
+ *         description: Tâche non trouvée
+ *       500:
+ *         description: Erreur serveur
+ */
 app.delete('/tasks/:id', auth, async (req, res) => {
   try {
     const task = await Task.findById(req.params.id);
@@ -319,4 +628,7 @@ app.delete('/tasks/:id', auth, async (req, res) => {
 
 // Démarrer le serveur
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Serveur démarré sur le port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Serveur démarré sur le port ${PORT}`)
+  console.log(`Documentation disponible à http://localhost:${PORT}/api-docs`);
+});
